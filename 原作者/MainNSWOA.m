@@ -9,7 +9,7 @@
 % edit the function 'evaluate_objective' to suit your needs.
 clc
 clear all
-D = 5; % Number of decision variables
+D = 30; % Number of decision variables
 M = 2; % Number of objective functions
 K=M+D;
 LB = ones(1, D).*0; %  LB - A vector of decimal values which indicate the minimum value for each decision variable.

@@ -14,7 +14,6 @@ optimizer = NSWOA.NSWOA(
 )
 
 optimizer.opt()
-print(777)
 aaa = np.array([k for k in optimizer.best_front])
 plt.scatter(aaa[:, 0], aaa[:, 1])
 plt.show()
