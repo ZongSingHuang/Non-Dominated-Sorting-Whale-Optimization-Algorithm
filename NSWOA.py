@@ -1,6 +1,7 @@
 import functools
 import itertools
 from operator import itemgetter
+import copy
 
 import numpy as np
 
@@ -50,6 +51,7 @@ class NSWOA:
                 # 從第一前緣解中隨機挑一條鯨魚 whale_best
                 best_front = [k for k in population if k["推薦等級"] == 0]
                 whale_best = np.random.choice(best_front)
+                whale_best = copy.deepcopy(whale_best)
 
                 # 新鯨魚 = 父代[i] + rand(D) × (whale_best - SF × 父代[i])
                 SF = round(1 + np.random.uniform())  # SF 不是 1 就是 2
@@ -75,22 +77,25 @@ class NSWOA:
                 # 若新鯨魚比父代[i]還要好
                 if self.dominates(whale_new, population[i]):
                     # 父代[i]放入子代[i]
-                    offspring[i]["X"] = population[i]["X"].copy()
-                    offspring[i]["F"] = population[i]["F"].copy()
+                    tmp1 = copy.deepcopy(population[i])
+                    offspring[i]["X"] = tmp1["X"].copy()
+                    offspring[i]["F"] = tmp1["F"].copy()
                     # 新鯨魚取代父代[i]
-                    population[i]["X"] = whale_new["X"].copy()
-                    population[i]["F"] = whale_new["F"].copy()
+                    tmp2 = copy.deepcopy(whale_new)
+                    population[i]["X"] = tmp2["X"].copy()
+                    population[i]["F"] = tmp2["F"].copy()
                 # 否則
                 else:
                     # 新鯨魚放入子代[i]
-                    offspring[i]["X"] = whale_new["X"].copy()
-                    offspring[i]["F"] = whale_new["F"].copy()
+                    tmp = copy.deepcopy(whale_new)
+                    offspring[i]["X"] = tmp["X"].copy()
+                    offspring[i]["F"] = tmp["F"].copy()
 
                 # 從父代隨機挑選一隻鯨魚 whale_rand，該鯨魚不可以是父代[i]
                 j = int(np.floor(np.random.uniform() * self.size_pop))
                 while i == j:
                     j = int(np.floor(np.random.uniform() * self.size_pop))
-                whale_rand = population[j]
+                whale_rand = copy.deepcopy(population[j])
 
                 # 生成新鯨魚(參照 Seyedali Mirjalili 的 WOA)
                 a = 2 - iteration * (2 / self.size_iter)
@@ -135,28 +140,29 @@ class NSWOA:
                 # 若新鯨魚比父代[i]還要好
                 if self.dominates(whale_new, population[i]):
                     # 父代[i]放入子代[i]
-                    offspring[i]["X"] = population[i]["X"].copy()
-                    offspring[i]["F"] = population[i]["F"].copy()
+                    tmp1 = copy.deepcopy(population[i])
+                    offspring[i]["X"] = tmp1["X"].copy()
+                    offspring[i]["F"] = tmp1["F"].copy()
                     # 新鯨魚取代父代[i]
-                    population[i]["X"] = whale_new["X"].copy()
-                    population[i]["F"] = whale_new["F"].copy()
+                    tmp2 = copy.deepcopy(whale_new)
+                    population[i]["X"] = tmp2["X"].copy()
+                    population[i]["F"] = tmp2["F"].copy()
                 # 否則
                 else:
                     # 新鯨魚放入子代[i]
-                    offspring[i]["X"] = whale_new["X"].copy()
-                    offspring[i]["F"] = whale_new["F"].copy()
+                    tmp = copy.deepcopy(whale_new)
+                    offspring[i]["X"] = tmp["X"].copy()
+                    offspring[i]["F"] = tmp["F"].copy()
 
                 # ---------- 突變策略 ----------
                 # 從父代隨機挑選一隻鯨魚 whale_rand，該鯨魚不可以是父代[i]
                 j = int(np.floor(np.random.uniform() * self.size_pop))
                 while i == j:
                     j = int(np.floor(np.random.uniform() * self.size_pop))
-                whale_rand = population[j]
+                whale_rand = copy.deepcopy(population[j])
 
                 # 令父代[i] 為 whale_mutate
-                whale_mutate = dict(population[i])
-                whale_mutate["X"] = population[i]["X"].copy()
-                whale_mutate["F"] = population[i]["F"].copy()
+                whale_mutate = copy.deepcopy(population[i])
                 # 生成一個由 1~D 組成的亂數數列 seed
                 seed = np.random.permutation(self.size_dim)
                 # seed 只取前 k 個
@@ -173,15 +179,18 @@ class NSWOA:
                 # 若 whale_mutate 比 whale_rand 還要好
                 if self.dominates(whale_mutate, whale_rand):
                     # whale_rand 放入子代[i]
-                    offspring[j]["X"] = whale_rand["X"].copy()
-                    offspring[j]["F"] = whale_rand["F"].copy()
+                    tmp1 = copy.deepcopy(whale_rand)
+                    offspring[j]["X"] = tmp1["X"].copy()
+                    offspring[j]["F"] = tmp1["F"].copy()
                     # whale_mutate 取代父代[i]
-                    population[j]["X"] = whale_mutate["X"].copy()
-                    population[j]["F"] = whale_mutate["F"].copy()
+                    tmp2 = copy.deepcopy(whale_mutate)
+                    population[j]["X"] = tmp2["X"].copy()
+                    population[j]["F"] = tmp2["F"].copy()
                 else:
                     # whale_mutate 放入子代[i]
-                    offspring[j]["X"] = whale_mutate["X"].copy()
-                    offspring[j]["F"] = whale_mutate["F"].copy()
+                    tmp = copy.deepcopy(whale_mutate)
+                    offspring[j]["X"] = tmp["X"].copy()
+                    offspring[j]["F"] = tmp["F"].copy()
 
             # 父代+子代
             family = population + offspring
@@ -194,11 +203,10 @@ class NSWOA:
 
             # 菁英策略
             population = self.elitist_strategy(population=family)
+            self.best_front = [k["F"].copy() for k in population if k["推薦等級"] == 0]
 
             # 迭代 + 1
             iteration += 1
-
-        self.best_front = [k for k in population if k["推薦等級"] == 0]
 
     # 初始化染色體
     def initial_chromosome(self) -> dict:
@@ -250,8 +258,8 @@ class NSWOA:
     # 支配判定
     def dominates(self, p1: dict, p2: dict) -> bool:
         # 望小
-        and_condition = all(p1["X"] <= p2["X"])
-        or_condition = any(p1["X"] < p2["X"])
+        and_condition = all(p1["F"] <= p2["F"])
+        or_condition = any(p1["F"] < p2["F"])
         return and_condition and or_condition
 
     # 擁擠度
