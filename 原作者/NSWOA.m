@@ -18,8 +18,8 @@ Iteration = 1;
 while Iteration<=Max_iteration % 迭代至 Max_iteration   
     for i = 1:SearchAgents_no %  掃遍所有父代的鯨魚
         % 從第一前緣解中隨機挑一條鯨魚 whale_best
-        Ffront = population((find(population(:,K+1)==1)),:);
-        ri =  floor(size(Ffront,1)*rand())+1;
+        best_front = population((find(population(:,K+1)==1)),:);
+        ri =  floor(size(best_front,1)*rand())+1;
         whale_best = population(ri,1:D);
 
         % 新鯨魚 = 父代[i] + rand(D) × (whale_best - SF × 父代[i])
