@@ -26,7 +26,7 @@ Dr. Pradeep Jangir (2023). MULTI OBJECTIVE NON SORTED WHALE OPTIMIZER (MOWOA) (N
 
 還是說明下 NSWOA 的流程，下面描述可能與代碼架構略有不同
 
-主流程:
+# 主流程:
 1. 生成父代
 2. 計算父代適應值
 3. 對父代進行非支配排序
