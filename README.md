@@ -22,10 +22,6 @@ http://dx.doi.org/10.19080/ETOAJ.2018.02.555579
 # reimplement from
 Dr. Pradeep Jangir (2023). MULTI OBJECTIVE NON SORTED WHALE OPTIMIZER (MOWOA) (NSWOA) (https://www.mathworks.com/matlabcentral/fileexchange/75261-multi-objective-non-sorted-whale-optimizer-mowoa-nswoa), MATLAB Central File Exchange. Retrieved February 26, 2023.
 
-還是說明下 NSWOA 的流程，下面描述可能與代碼架構略有不同
-
-還是說明下 NSWOA 的流程，下面描述可能與代碼架構略有不同
-
 # 主流程:
 1. 生成父代
 2. 計算父代適應值
