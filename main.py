@@ -1,7 +1,8 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 import benchmark
 import NSWOA
-import numpy as np
-import matplotlib.pyplot as plt
 
 optimizer = NSWOA.NSWOA(
     size_dim=30,
@@ -10,7 +11,7 @@ optimizer = NSWOA.NSWOA(
     size_pop=100,
     lb=0,
     ub=1,
-    benchmark=benchmark.ztd1,
+    benchmark=benchmark.ztd3,
 )
 
 optimizer.opt()

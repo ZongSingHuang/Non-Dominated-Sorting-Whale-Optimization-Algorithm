@@ -1,7 +1,6 @@
 import functools
 import itertools
 from operator import itemgetter
-import copy
 
 import numpy as np
 
@@ -41,63 +40,69 @@ class NSWOA:
 
         # 開始迭代
         iteration = 0
-        offspring = [self.initial_chromosome() for _ in range(self.size_pop)]
         while iteration <= self.size_iter:
+            # 訊息
             if (iteration + 1) % 10 == 0:
                 print(f"iteration {iteration + 1}")
+
+            # 初始化子代
+            offspring = [
+                self.initial_chromosome(is_zero=True) for _ in range(self.size_pop)
+            ]
 
             # by size_pop
             for i in range(self.size_pop):
                 # 從第一前緣解中隨機挑一條鯨魚 whale_best
                 best_front = [k for k in population if k["推薦等級"] == 0]
                 whale_best = np.random.choice(best_front)
-                whale_best = copy.deepcopy(whale_best)
 
-                # 新鯨魚 = 父代[i] + rand(D) × (whale_best - SF × 父代[i])
-                SF = round(1 + np.random.uniform())  # SF 不是 1 就是 2
-                whale_new = population[i]["X"] + np.random.uniform(
+                # ---------- 新鯨魚 1: MFO ----------
+                # 新鯨魚 1 = 父代[i] + rand(D) × (whale_best - SF × 父代[i])
+                SF = np.random.randint(1, 3)  # SF 不是 1 就是 2
+                whale_new1 = population[i]["X"] + np.random.uniform(
                     size=self.size_dim
                 ) * (whale_best["X"] - SF * population[i]["X"])
 
                 # 邊界處理
-                whale_new = np.clip(whale_new, self.lb, self.ub)
+                whale_new1 = np.clip(whale_new1, self.lb, self.ub)
 
-                # 新鯨魚轉 dict
-                whale_new = {
-                    "X": whale_new,
+                # 四捨五入
+                whale_new1 = np.round(whale_new1, 2)
+
+                # 新鯨魚 1 轉 dict
+                whale_new1 = {
+                    "X": whale_new1,
                     "F": np.zeros(self.size_obj),
                     "輸給幾組": -1,
                     "贏了誰": [],
                     "推薦等級": -1,
                 }
 
-                # 新鯨魚的適應值
-                whale_new = self.calc_benchmark(population=[whale_new])[0]
+                # 新鯨魚 1 的適應值
+                whale_new1 = self.calc_benchmark(population=[whale_new1])[0]
 
-                # 若新鯨魚比父代[i]還要好
-                if self.dominates(whale_new, population[i]):
+                # 若新鯨魚 1 比父代[i]還要好
+                if self.dominates(whale_new1, population[i]):
                     # 父代[i]放入子代[i]
-                    tmp1 = copy.deepcopy(population[i])
-                    offspring[i]["X"] = tmp1["X"].copy()
-                    offspring[i]["F"] = tmp1["F"].copy()
-                    # 新鯨魚取代父代[i]
-                    tmp2 = copy.deepcopy(whale_new)
-                    population[i]["X"] = tmp2["X"].copy()
-                    population[i]["F"] = tmp2["F"].copy()
+                    offspring[i]["X"] = population[i]["X"].copy()
+                    offspring[i]["F"] = population[i]["F"].copy()
+                    # 新鯨魚 1 取代父代[i]
+                    population[i]["X"] = whale_new1["X"].copy()
+                    population[i]["F"] = whale_new1["F"].copy()
                 # 否則
                 else:
-                    # 新鯨魚放入子代[i]
-                    tmp = copy.deepcopy(whale_new)
-                    offspring[i]["X"] = tmp["X"].copy()
-                    offspring[i]["F"] = tmp["F"].copy()
+                    # 新鯨魚 1 放入子代[i]
+                    offspring[i]["X"] = whale_new1["X"].copy()
+                    offspring[i]["F"] = whale_new1["F"].copy()
 
                 # 從父代隨機挑選一隻鯨魚 whale_rand，該鯨魚不可以是父代[i]
                 j = int(np.floor(np.random.uniform() * self.size_pop))
                 while i == j:
                     j = int(np.floor(np.random.uniform() * self.size_pop))
-                whale_rand = copy.deepcopy(population[j])
+                whale_rand = population[j]
 
-                # 生成新鯨魚(參照 Seyedali Mirjalili 的 WOA)
+                # ---------- 新鯨魚 2: Seyedali Mirjalili 的 WOA ----------
+                # 生成係數
                 a = 2 - iteration * (2 / self.size_iter)
                 a2 = -1 + iteration * (-1 / self.size_iter)
                 r1 = np.random.uniform()
@@ -108,13 +113,13 @@ class NSWOA:
                 t = (a2 - 1) * np.random.uniform() + 1
                 p = np.random.uniform()
                 if p < 0.5:
-                    whale_new = (
+                    whale_new2 = (
                         population[i]["X"]
                         + whale_best["X"]
                         - A * np.abs(C * whale_best["X"] - whale_rand["X"])
                     )
                 else:
-                    whale_new = (
+                    whale_new2 = (
                         population[i]["X"]
                         + np.abs(whale_best["X"] - whale_rand["X"])
                         * np.exp(b * t)
@@ -123,11 +128,14 @@ class NSWOA:
                     )
 
                 # 邊界處理
-                whale_new = np.clip(whale_new, self.lb, self.ub)
+                whale_new2 = np.clip(whale_new2, self.lb, self.ub)
 
-                # 新鯨魚轉 dict
-                whale_new = {
-                    "X": whale_new,
+                # 四捨五入
+                whale_new2 = np.round(whale_new2, 2)
+
+                # 新鯨魚 2 轉 dict
+                whale_new2 = {
+                    "X": whale_new2,
                     "F": np.zeros(self.size_obj),
                     "輸給幾組": -1,
                     "贏了誰": [],
@@ -135,62 +143,68 @@ class NSWOA:
                 }
 
                 # 適應值
-                whale_new = self.calc_benchmark(population=[whale_new])[0]
+                whale_new2 = self.calc_benchmark(population=[whale_new2])[0]
 
-                # 若新鯨魚比父代[i]還要好
-                if self.dominates(whale_new, population[i]):
+                # 若新鯨魚 2 比父代[i]還要好
+                if self.dominates(whale_new2, population[i]):
                     # 父代[i]放入子代[i]
-                    tmp1 = copy.deepcopy(population[i])
-                    offspring[i]["X"] = tmp1["X"].copy()
-                    offspring[i]["F"] = tmp1["F"].copy()
-                    # 新鯨魚取代父代[i]
-                    tmp2 = copy.deepcopy(whale_new)
-                    population[i]["X"] = tmp2["X"].copy()
-                    population[i]["F"] = tmp2["F"].copy()
+                    offspring[i]["X"] = population[i]["X"].copy()
+                    offspring[i]["F"] = population[i]["F"].copy()
+                    # 新鯨魚 2 取代父代[i]
+                    population[i]["X"] = whale_new2["X"].copy()
+                    population[i]["F"] = whale_new2["F"].copy()
                 # 否則
                 else:
-                    # 新鯨魚放入子代[i]
-                    tmp = copy.deepcopy(whale_new)
-                    offspring[i]["X"] = tmp["X"].copy()
-                    offspring[i]["F"] = tmp["F"].copy()
+                    # 新鯨魚 2 放入子代[i]
+                    offspring[i]["X"] = whale_new2["X"].copy()
+                    offspring[i]["F"] = whale_new2["F"].copy()
 
-                # ---------- 突變策略 ----------
+                # ---------- 新鯨魚 3: 突變策略 ----------
                 # 從父代隨機挑選一隻鯨魚 whale_rand，該鯨魚不可以是父代[i]
                 j = int(np.floor(np.random.uniform() * self.size_pop))
                 while i == j:
                     j = int(np.floor(np.random.uniform() * self.size_pop))
-                whale_rand = copy.deepcopy(population[j])
+                whale_rand = population[j]
 
-                # 令父代[i] 為 whale_mutate
-                whale_mutate = copy.deepcopy(population[i])
+                # 令父代[i] 為 whale_new3
+                whale_new3 = population[i]["X"].copy()
                 # 生成一個由 1~D 組成的亂數數列 seed
                 seed = np.random.permutation(self.size_dim)
                 # seed 只取前 k 個
                 k = int(np.ceil(np.random.uniform() * self.size_dim))
                 pick = seed[:k]
-                # 對 whale_mutate 的特定維度進行突變
-                whale_mutate["X"][pick] = np.random.uniform(
+                # 對 whale_new3 的特定維度進行突變
+                whale_new3[pick] = np.random.uniform(
                     low=self.ub[pick], high=self.lb[pick]
                 )
 
-                # 適應值
-                whale_mutate = self.calc_benchmark(population=[whale_mutate])[0]
+                # 四捨五入
+                whale_new3 = np.round(whale_new3, 2)
 
-                # 若 whale_mutate 比 whale_rand 還要好
-                if self.dominates(whale_mutate, whale_rand):
+                # 新鯨魚 3 轉 dict
+                whale_new3 = {
+                    "X": whale_new3,
+                    "F": np.zeros(self.size_obj),
+                    "輸給幾組": -1,
+                    "贏了誰": [],
+                    "推薦等級": -1,
+                }
+
+                # 適應值
+                whale_new3 = self.calc_benchmark(population=[whale_new3])[0]
+
+                # 若 whale_new3 比 whale_rand 還要好
+                if self.dominates(whale_new3, whale_rand):
                     # whale_rand 放入子代[i]
-                    tmp1 = copy.deepcopy(whale_rand)
-                    offspring[j]["X"] = tmp1["X"].copy()
-                    offspring[j]["F"] = tmp1["F"].copy()
-                    # whale_mutate 取代父代[i]
-                    tmp2 = copy.deepcopy(whale_mutate)
-                    population[j]["X"] = tmp2["X"].copy()
-                    population[j]["F"] = tmp2["F"].copy()
+                    offspring[j]["X"] = whale_rand["X"].copy()
+                    offspring[j]["F"] = whale_rand["F"].copy()
+                    # whale_new3 取代父代[i]
+                    population[j]["X"] = whale_new3["X"].copy()
+                    population[j]["F"] = whale_new3["F"].copy()
                 else:
-                    # whale_mutate 放入子代[i]
-                    tmp = copy.deepcopy(whale_mutate)
-                    offspring[j]["X"] = tmp["X"].copy()
-                    offspring[j]["F"] = tmp["F"].copy()
+                    # whale_new3 放入子代[i]
+                    offspring[j]["X"] = whale_new3["X"].copy()
+                    offspring[j]["F"] = whale_new3["F"].copy()
 
             # 父代+子代
             family = population + offspring
@@ -209,14 +223,24 @@ class NSWOA:
             iteration += 1
 
     # 初始化染色體
-    def initial_chromosome(self) -> dict:
-        chromosome = {
-            "X": np.random.uniform(low=self.lb, high=self.ub, size=[self.size_dim]),
-            "F": np.zeros(self.size_obj),
-            "輸給幾組": -1,
-            "贏了誰": [],
-            "推薦等級": -1,
-        }
+    def initial_chromosome(self, is_zero: bool = False) -> dict:
+        if is_zero:
+            chromosome = {
+                "X": np.zeros(self.size_dim),
+                "F": np.zeros(self.size_obj),
+                "輸給幾組": -1,
+                "贏了誰": [],
+                "推薦等級": -1,
+            }
+        else:
+            chromosome = {
+                "X": np.random.uniform(low=self.lb, high=self.ub, size=[self.size_dim]),
+                "F": np.zeros(self.size_obj),
+                "輸給幾組": -1,
+                "贏了誰": [],
+                "推薦等級": -1,
+            }
+            chromosome["X"] = np.round(chromosome["X"], 2)
         return chromosome
 
     # 快速非支配排序
@@ -225,6 +249,7 @@ class NSWOA:
         for master_idx, master in enumerate(population):
             master["擁擠度"] = 0
             master["輸給幾組"] = 0
+            master["推薦等級"] = None
             master["贏了誰"] = []
             for slave_idx, slave in enumerate(population):
                 if self.dominates(master, slave):

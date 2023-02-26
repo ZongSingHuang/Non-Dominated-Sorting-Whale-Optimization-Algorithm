@@ -8,7 +8,7 @@ def ztd1(population: list) -> list:
         n = len(X)
         g = 1 + 9 * np.sum(X[1:]) / (n - 1)
         F[0] = X[0]
-        F[1] = 1 - np.sqrt(X[0] / g)
+        F[1] = np.round(1 - np.sqrt(X[0] / g), 2)
         population[idx]["F"] = F
     return population
 
@@ -32,6 +32,8 @@ def ztd3(population: list) -> list:
         n = len(X)
         g = 1 + 9 * np.sum(X[1:]) / (n - 1)
         F[0] = X[0]
-        F[1] = 1 - np.sqrt(X[0] / g) - (X[0] / g) * np.sin(10 * np.pi * X[0])
+        F[1] = np.round(
+            1 - np.sqrt(X[0] / g) - (X[0] / g) * np.sin(10 * np.pi * X[0]), 2
+        )
         population[idx]["F"] = F
     return population
