@@ -66,9 +66,6 @@ class NSWOA:
                 # 邊界處理
                 whale_new1 = np.clip(whale_new1, self.lb, self.ub)
 
-                # 四捨五入
-                whale_new1 = np.round(whale_new1, 2)
-
                 # 新鯨魚 1 轉 dict
                 whale_new1 = {
                     "X": whale_new1,
@@ -130,9 +127,6 @@ class NSWOA:
                 # 邊界處理
                 whale_new2 = np.clip(whale_new2, self.lb, self.ub)
 
-                # 四捨五入
-                whale_new2 = np.round(whale_new2, 2)
-
                 # 新鯨魚 2 轉 dict
                 whale_new2 = {
                     "X": whale_new2,
@@ -177,9 +171,6 @@ class NSWOA:
                 whale_new3[pick] = np.random.uniform(
                     low=self.ub[pick], high=self.lb[pick]
                 )
-
-                # 四捨五入
-                whale_new3 = np.round(whale_new3, 2)
 
                 # 新鯨魚 3 轉 dict
                 whale_new3 = {
@@ -240,7 +231,6 @@ class NSWOA:
                 "贏了誰": [],
                 "推薦等級": -1,
             }
-            chromosome["X"] = np.round(chromosome["X"], 2)
         return chromosome
 
     # 快速非支配排序
