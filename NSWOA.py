@@ -219,17 +219,17 @@ class NSWOA:
             chromosome = {
                 "X": np.zeros(self.size_dim),
                 "F": np.zeros(self.size_obj),
-                "輸給幾組": -1,
+                "輸給幾組": None,
                 "贏了誰": [],
-                "推薦等級": -1,
+                "推薦等級": None,
             }
         else:
             chromosome = {
                 "X": np.random.uniform(low=self.lb, high=self.ub, size=[self.size_dim]),
                 "F": np.zeros(self.size_obj),
-                "輸給幾組": -1,
+                "輸給幾組": None,
                 "贏了誰": [],
-                "推薦等級": -1,
+                "推薦等級": None,
             }
         return chromosome
 
