@@ -70,9 +70,9 @@ class NSWOA:
                 whale_new1 = {
                     "X": whale_new1,
                     "F": np.zeros(self.size_obj),
-                    "輸給幾組": -1,
+                    "輸給幾組": 0,
                     "贏了誰": [],
-                    "推薦等級": -1,
+                    "推薦等級": None,
                 }
 
                 # 新鯨魚 1 的適應值
@@ -131,9 +131,9 @@ class NSWOA:
                 whale_new2 = {
                     "X": whale_new2,
                     "F": np.zeros(self.size_obj),
-                    "輸給幾組": -1,
+                    "輸給幾組": 0,
                     "贏了誰": [],
-                    "推薦等級": -1,
+                    "推薦等級": None,
                 }
 
                 # 適應值
@@ -176,9 +176,9 @@ class NSWOA:
                 whale_new3 = {
                     "X": whale_new3,
                     "F": np.zeros(self.size_obj),
-                    "輸給幾組": -1,
+                    "輸給幾組": 0,
                     "贏了誰": [],
-                    "推薦等級": -1,
+                    "推薦等級": None,
                 }
 
                 # 適應值
@@ -219,7 +219,7 @@ class NSWOA:
             chromosome = {
                 "X": np.zeros(self.size_dim),
                 "F": np.zeros(self.size_obj),
-                "輸給幾組": None,
+                "輸給幾組": 0,
                 "贏了誰": [],
                 "推薦等級": None,
             }
@@ -227,7 +227,7 @@ class NSWOA:
             chromosome = {
                 "X": np.random.uniform(low=self.lb, high=self.ub, size=[self.size_dim]),
                 "F": np.zeros(self.size_obj),
-                "輸給幾組": None,
+                "輸給幾組": 0,
                 "贏了誰": [],
                 "推薦等級": None,
             }
