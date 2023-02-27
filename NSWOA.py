@@ -303,6 +303,7 @@ class NSWOA:
                         ) / scale
         return population
 
+    # 菁英策略
     def elitist_strategy(self, population: list) -> list:
         # 初始化
         elitist = list()
