@@ -294,8 +294,7 @@ class NSWOA:
                 F_all = [t["F"][j] for t in FRONT]
                 scale = max(F_all) - min(F_all)
                 if scale == 0:
-                    for k in range(1, FRONT_len - 1):
-                        FRONT[k]["擁擠度"] = np.inf
+                    scale = 1
                 else:
                     for k in range(1, FRONT_len - 1):
                         FRONT[k]["擁擠度"] += (
@@ -303,7 +302,6 @@ class NSWOA:
                         ) / scale
         return population
 
-    # 菁英策略
     def elitist_strategy(self, population: list) -> list:
         # 初始化
         elitist = list()
